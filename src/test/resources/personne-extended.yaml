@@ -1,0 +1,6 @@
+name: PersonExtended
+package: com.meatwork.orm.plugin.test.PersonExtended
+extended: com.meatwork.orm.plugin.test.Person
+fields:
+  - name: age
+    type: integer

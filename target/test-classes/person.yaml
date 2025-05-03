@@ -1,0 +1,14 @@
+name: Person
+package: com.meatwork.orm.plugin.test
+fields:
+  - id: true
+    name: id
+    type: string
+    unique: true
+  - id: false
+    name: name
+    type: string
+    unique: false
+  - name: card
+    type: entityRef
+    mappedBy: com.meatwork.orm.plugin.test.Card
