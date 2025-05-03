@@ -12,3 +12,7 @@ fields:
   - name: card
     type: entityRef
     mappedBy: com.meatwork.orm.plugin.test.Card
+  - name: price
+    type: bigdecimal
+    scale: 2
+    precision: 10

@@ -11,7 +11,7 @@ public class ${className} extends ${superClass} {
     <#if superClass == "AbstractMeatEntity">
         return new MetaProperty[] {
         <#list fields as field>
-            new MetaProperty(${field.name}, PropertyType.${field.type}, ${field.id}, ${field.unique}, ${field.nullable})
+            new MetaProperty(${field.name}, PropertyType.${field.type}, ${field.id}, ${field.unique}, ${field.nullable}<#if field.extraProperties != "">, ${field.extraProperties}</#if>),
         </#list>
         };
     <#else>
@@ -31,8 +31,8 @@ public class ${className} extends ${superClass} {
         return this.getProperty("${field.name}");
     }
 
-    public void set${field.name?cap_first}(${field.typeConverted} ${field.name}?lower_case) {
-        this.updateProperty("${field.name}", ${field.name}?lower_case);
+    public void set${field.name?cap_first}(${field.typeConverted} ${field.name?lower_case}) {
+        this.updateProperty("${field.name}", ${field.name?lower_case});
     }
 </#list>
 

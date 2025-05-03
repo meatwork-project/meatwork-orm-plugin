@@ -16,6 +16,7 @@ public class EntityDescription {
 	private final String packageName;
 	private final String className;
 	private final String extended;
+	private final String fullClassName;
 	private final String tableName;
 	private final List<FieldDescription> fields = new ArrayList<>();
 
@@ -29,18 +30,12 @@ public class EntityDescription {
 		for (var field : ((List<Map<String, Object>>) root.get("fields"))) {
 			this.fields.add(new FieldDescription(field));
 		}
-	}
 
-	public String getPackageName() {
-		return packageName;
+		this.fullClassName = packageName + "." + className;
 	}
 
 	public String getClassName() {
 		return className;
-	}
-
-	public String getExtended() {
-		return extended;
 	}
 
 	public String getTableName() {
@@ -59,6 +54,10 @@ public class EntityDescription {
 		map.put("tableName", tableName);
 		map.put("fields", processFieldToMap(fields));
 		return map;
+	}
+
+	public String getFullClassName() {
+		return fullClassName;
 	}
 
 	private static List<Map<String, String>> processFieldToMap(List<FieldDescription> list) throws EntityGeneratorException {

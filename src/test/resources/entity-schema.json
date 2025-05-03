@@ -13,6 +13,10 @@
       "description": "Nom de l'entité",
       "pattern": "^[A-Z].*"
     },
+    "table": {
+      "type": "string",
+      "description": "Nom de la table"
+    },
     "extended": {
       "type": "string",
       "description": "Package de l'entité étendue"
@@ -59,16 +63,57 @@
             "default": false,
             "description": "Le champ est unique"
           },
-          "nullable": {
-            "type": "boolean",
-            "default": true,
-            "description": "Le champ est nullable"
-          },
           "mappedBy": {
             "type": "string",
             "description": "Nom du champ de l'entité référencée"
           }
-        }
+        },
+        "oneOf": [
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "bigdecimal"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "precision": {
+                  "type": "integer",
+                  "description": "Précision pour le type bigdecimal"
+                },
+                "scale": {
+                  "type": "integer",
+                  "description": "Échelle pour le type bigdecimal"
+                }
+              },
+              "required": [
+                "precision",
+                "scale"
+              ],
+              "description": "Propriétés supplémentaires pour le type bigdecimal"
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "not": {
+                    "const": "bigdecimal"
+                  }
+                }
+              }
+            },
+            "then": {
+              "not": {
+                "required": [
+                  "extraProperties"
+                ]
+              }
+            }
+          }
+        ]
       }
     }
   }

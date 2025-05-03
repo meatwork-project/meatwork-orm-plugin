@@ -36,6 +36,11 @@ public final class ToolsUtils {
 		return value == null ? defaultValue : String.valueOf(value);
 	}
 
+	public static String getValueOrDefault(String value,
+	                               String defaultValue) {
+		return value == null ? defaultValue : value;
+	}
+
 	public static void checkNumberOfIds(int nbIds) throws EntityGeneratorException {
 		if (nbIds > 1) {
 			throw new EntityGeneratorException("Need only one primary key");

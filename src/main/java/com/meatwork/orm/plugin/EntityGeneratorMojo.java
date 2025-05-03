@@ -17,7 +17,6 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,36 +34,31 @@ public class EntityGeneratorMojo extends AbstractMojo {
 	private MavenProject project;
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void execute() throws MojoExecutionException {
 		var cfg = getConfiguration();
 
-		try {
-			var yamlFilesPath = Files
-					.walk(project
-							      .getFile()
-							      .toPath()
-							      .resolve(yamlFiles))
+		try(var streamYamFiles = Files
+				     .walk(project
+						           .getFile()
+						           .toPath()
+						           .resolve(yamlFiles))) {
+			var yamlFilesPath = streamYamFiles
 					.filter(p -> p
 							.toString()
 							.endsWith(".yaml"))
 					.toList();
-
-			for (Path yamlFile : yamlFilesPath) {
-				try (FileReader reader = new FileReader(yamlFile.toFile())) {
-					Yaml yaml = new Yaml();
-					var entityDescription = new EntityDescription(yaml.load(reader));
+			var entityDescriptions = getEntityDescriptions(yamlFilesPath);
+			for (var entityDescription : entityDescriptions) {
+				try {
+					processMappedBy(entityDescription.getFields(), entityDescriptions);
 					processTpl(
 							cfg,
 							entityDescription.getClassName(),
 							entityDescription.toMap()
 					);
 					getLog().info("Classe générée pour " + entityDescription.getClassName());
-				} catch (Exception e) {
-					throw new MojoExecutionException(
-							"Erreur lors du traitement de " + yamlFile,
-							e
-					);
+				} catch (IOException | TemplateException e) {
+					getLog().error("Erreur lors du traitement de " + entityDescription.getClassName());
 				}
 			}
 		} catch (IOException e) {
@@ -81,6 +75,50 @@ public class EntityGeneratorMojo extends AbstractMojo {
 						.getBasedir()
 						.getAbsolutePath() + "/target/generated-sources/xmlgen"
 		);
+	}
+
+	public void processMappedBy(List<FieldDescription> currentField, List<EntityDescription> entities) throws EntityGeneratorException {
+		List<FieldDescription> list = currentField
+				.stream()
+				.filter(it -> it.getMappedBy() != null)
+				.toList();
+		for (FieldDescription fieldDescription : list) {
+			var entityDescription = getEntityDescriptionByName(
+					fieldDescription.getMappedBy(),
+					entities
+			);
+			FieldDescription fieldDescriptionId = entityDescription
+					.getFields()
+					.stream()
+					.filter(FieldDescription::getId)
+					.findFirst()
+					.orElse(null);
+			if(fieldDescriptionId == null) {
+				throw new EntityGeneratorException("Cannot found id field for entity " + entityDescription.getFullClassName());
+			}
+			fieldDescription.addExtraProperties("new EntityRefProperty(%s, \"%s\", \"%s\")".formatted("PropertyType." + fieldDescriptionId.getType().toUpperCase(), entityDescription.getTableName(), fieldDescriptionId.getName()));
+		}
+	}
+
+	private EntityDescription getEntityDescriptionByName(String name, List<EntityDescription> entities) {
+		return entities
+				.stream()
+				.filter(it -> it.getFullClassName().equals(name))
+				.findFirst()
+				.orElse(null);
+	}
+
+	private List<EntityDescription> getEntityDescriptions(List<Path> paths) {
+		List<EntityDescription> entityDescriptions = new ArrayList<>();
+		for (Path yamlFile : paths) {
+			try (FileReader reader = new FileReader(yamlFile.toFile())) {
+				Yaml yaml = new Yaml();
+				entityDescriptions.add(new EntityDescription(yaml.load(reader)));
+			} catch (Exception e) {
+				getLog().error("Erreur lors du traitement de " + yamlFile);
+			}
+		}
+		return entityDescriptions;
 	}
 
 	private Configuration getConfiguration() {

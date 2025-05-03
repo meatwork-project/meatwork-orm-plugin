@@ -67,7 +67,53 @@
             "type": "string",
             "description": "Nom du champ de l'entité référencée"
           }
-        }
+        },
+        "oneOf": [
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "bigdecimal"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "precision": {
+                  "type": "integer",
+                  "description": "Précision pour le type bigdecimal"
+                },
+                "scale": {
+                  "type": "integer",
+                  "description": "Échelle pour le type bigdecimal"
+                }
+              },
+              "required": [
+                "precision",
+                "scale"
+              ],
+              "description": "Propriétés supplémentaires pour le type bigdecimal"
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "not": {
+                    "const": "bigdecimal"
+                  }
+                }
+              }
+            },
+            "then": {
+              "not": {
+                "required": [
+                  "extraProperties"
+                ]
+              }
+            }
+          }
+        ]
       }
     }
   }
