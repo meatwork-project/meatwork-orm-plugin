@@ -5,6 +5,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -24,7 +25,7 @@ import java.util.Map;
  * Copyright (c) 2025 Taliro.
  * All rights reserved.
  */
-@Mojo(name = "entityGenerator")
+@Mojo(name = "entityGenerator", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class EntityGeneratorMojo extends AbstractMojo {
 
 	@Parameter(name = "xmlPath", required = true)
